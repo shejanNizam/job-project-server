@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
 const app = express();
@@ -25,8 +25,22 @@ async function run() {
     await client.connect();
     console.log("Connected to MongoDB");
 
-    const db = client.db("jobProjectUserDB");
-    const collection = db.collection("users");
+    const collection = client.db("jobProjectUserDB").collection("users");
+    const collectionMenu = client.db("jobProjectUserDB").collection("menu");
+
+    //get
+    app.get("/menu", async (req, res) => {
+      const result = await collectionMenu.find().toArray();
+      res.send(result);
+    });
+
+    // single get
+    app.get("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await collectionMenu.findOne(query);
+      res.send(result);
+    });
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
